@@ -1,3 +1,18 @@
+import pandas as pd
+import os
+import streamlit as st
+
+player_info_versues_defense_sheet_id = '1-LJBuRyoTfp38xLM_6TQ7fUOHgbEnNVh'
+todays_games_sheet_id = '1-Din9sCqXU7KGoRPenl8zX_KhBkFVLUg'
+player_log_id = '1-S9tHnbGZmU_bvif79po3Wa26zykbc0G'
+
+player_info_versues_defense = pd.read_csv(f"https://docs.google.com/spreadsheets/d/{player_info_versues_defense_sheet_id}/export?format=csv")
+todays_games = pd.read_csv(f"https://docs.google.com/spreadsheets/d/{todays_games_sheet_id}/export?format=csv")
+player_log  = pd.read_csv(f"https://docs.google.com/spreadsheets/d/{player_log_id}/export?format=csv")
+
+# Remove text after the dot in column names
+# %%
+
 # Set page configuration
 st.set_page_config(layout="wide")
 
