@@ -10,9 +10,6 @@ player_info_versues_defense = pd.read_csv(f"https://docs.google.com/spreadsheets
 todays_games = pd.read_csv(f"https://docs.google.com/spreadsheets/d/{todays_games_sheet_id}/export?format=csv")
 player_log  = pd.read_csv(f"https://docs.google.com/spreadsheets/d/{player_log_id}/export?format=csv")
 
-# Remove text after the dot in column names
-# %%
-
 # Set page configuration
 st.set_page_config(layout="wide")
 
@@ -69,7 +66,7 @@ if not player_info.empty:
 
     st.dataframe(player_v_opponent.set_index(player_v_opponent.columns[0]))
 else:
-    st.markdown(f'<h4 style="color:red;">{selected_player} does not have an opponent in the available data.</h4>', unsafe_allow_html=True)
+    st.markdown(f'<h4 style="color:red;">{selected_player} has not played this team.</h4>', unsafe_allow_html=True)
 
 # Player Log #  
 # Filter the player_log table based on the selected player and team
@@ -119,3 +116,4 @@ filtered_player_log_opp= player_log[
 filtered_player_log_opp['Date'] = pd.to_datetime(filtered_player_log_opp['Date']).dt.strftime('%m/%d/%Y')
 filtered_player_log_opp[columns_to_format_4] = filtered_player_log_opp[columns_to_format_4].applymap(lambda x: '{:.1f}'.format(x))
 st.dataframe(filtered_player_log_opp.set_index(filtered_player_log_opp.columns[0]))
+
