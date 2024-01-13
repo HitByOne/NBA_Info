@@ -1,3 +1,19 @@
+# %%
+import pandas as pd
+import os
+import streamlit as st
+
+player_info_versues_defense_sheet_id = '1-LJBuRyoTfp38xLM_6TQ7fUOHgbEnNVh'
+todays_games_sheet_id = '1-Din9sCqXU7KGoRPenl8zX_KhBkFVLUg'
+player_log_id = '1-S9tHnbGZmU_bvif79po3Wa26zykbc0G'
+
+player_info_versues_defense = pd.read_csv(f"https://docs.google.com/spreadsheets/d/{player_info_versues_defense_sheet_id}/export?format=csv")
+todays_games = pd.read_csv(f"https://docs.google.com/spreadsheets/d/{todays_games_sheet_id}/export?format=csv")
+player_log  = pd.read_csv(f"https://docs.google.com/spreadsheets/d/{player_log_id}/export?format=csv")
+
+# Remove text after the dot in column names
+# %%
+
 # Set page configuration
 st.set_page_config(layout="wide")
 
@@ -90,11 +106,11 @@ st.dataframe(filtered_player_log_subset.set_index(filtered_player_log_subset.col
 st.markdown(f'<h4 style="color:blue;">Players Against Opponent</h4>', unsafe_allow_html=True)
 selected_opponent = st.selectbox("Select Opponent:", sorted(player_log['Opponent'].unique()))
 selected_position = st.selectbox("Select Position:", sorted(player_log['Position'].unique()))
-is_starter = st.checkbox("Show only Starters")
+
 
 options_opp = ["Last 1", "Last 3", "Last 5", "Last 10", "All Dates"]
 selected_option_opp = st.selectbox("Select Last Games Played:", options_opp, key="opp_games_selectbox")
-
+is_starter = st.checkbox("Show only Starters")
 # Filter the player log based on the selected opponent, starter, and position
 filtered_player_log_opp = player_log[
     (player_log['Opponent'] == selected_opponent)
