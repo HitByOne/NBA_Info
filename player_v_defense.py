@@ -37,6 +37,8 @@ filtered_df[columns_to_format_5] = filtered_df[columns_to_format_5].applymap(lam
 
 st.dataframe(filtered_df.set_index(filtered_df.columns[0]))
 
+
+
 # Player Log #
 st.markdown(f'<h4 style="color:blue;">Player Log</h4>', unsafe_allow_html=True)
 selected_team = st.selectbox("Select a Team:", sorted(player_log['Team'].unique()))
@@ -47,15 +49,55 @@ players_in_selected_team = sorted(player_log[player_log['Team'] == selected_team
 # Create a dropdown menu for selecting a player in the selected team
 selected_player = st.selectbox("Select a Player:", players_in_selected_team)
 
+
+## Player Vs Opponent Log #
+player_info = player_info_versues_defense[player_info_versues_defense['Player'] == selected_player]
+
+# Check if player_info is empty
+if not player_info.empty:
+    player_opponent = player_info[['Player', 'Opponent']].head(1)
+    player_v_opponent = pd.merge(player_opponent, player_log, how='inner', on=['Player', 'Opponent'])
+
+    # Convert the Date column to datetime format and remove T00:00:00
+    player_v_opponent['Date'] = pd.to_datetime(player_v_opponent['Date']).dt.strftime('%Y-%m-%d')
+
+    player_v_opponent[columns_to_format_4] = player_v_opponent[columns_to_format_4].applymap(lambda x: '{:.1f}'.format(x))
+    st.markdown(f'<h4 style="color:blue;">{selected_player} vs. {player_opponent["Opponent"].iloc[0]}</h4>', unsafe_allow_html=True)
+
+    # Sort DataFrame by Date
+    player_v_opponent = player_v_opponent.sort_values(by='Date')
+
+    st.dataframe(player_v_opponent.set_index(player_v_opponent.columns[0]))
+else:
+    st.markdown(f'<h4 style="color:red;">{selected_player} does not have an opponent in the available data.</h4>', unsafe_allow_html=True)
+
+# Player Log #  
 # Filter the player_log table based on the selected player and team
 filtered_player_log = player_log[
     (player_log['Player'] == selected_player) &
     (player_log['Team'] == selected_team)
 ]
 
-filtered_player_log[columns_to_format_4] = filtered_player_log[columns_to_format_4].applymap(lambda x: '{:.1f}'.format(x))
+# Convert the Date column to datetime format and remove T00:00:00
+filtered_player_log['Date'] = pd.to_datetime(filtered_player_log['Date']).dt.strftime('%Y-%m-%d')
 
-st.dataframe(filtered_player_log.set_index(filtered_player_log.columns[0]))
+# Sort DataFrame by Date
+filtered_player_log = filtered_player_log.sort_values(by='Date', ascending=False)
+st.markdown(f'<h4 style="color:blue;">{selected_player} Previous Games</h4>', unsafe_allow_html=True)
+# Dropdown to dynamically filter the number of columns shown by date
+options = ["Last 1", "Last 3", "Last 5", "Last 10", "All Dates"]
+selected_option = st.selectbox("Select Last Games Played:", options)
+
+# Determine the number of columns to show based on the selected option
+if selected_option == "All Dates":
+    num_columns_to_show = len(filtered_player_log)
+else:
+    num_columns_to_show = int(selected_option.split()[-1])
+
+
+filtered_player_log_subset = filtered_player_log.head(num_columns_to_show)
+filtered_player_log_subset[columns_to_format_4] = filtered_player_log_subset[columns_to_format_4].applymap(lambda x: '{:.1f}'.format(x))
+st.dataframe(filtered_player_log_subset.set_index(filtered_player_log_subset.columns[0]))
 
 
 # Opposing Team  Player Log # 
@@ -68,15 +110,12 @@ selected_position = st.selectbox("Select Position:", sorted(player_log['Position
 # Create a checkbox for filtering by Starter
 is_starter = st.checkbox("Show only Starters")
 
-
-
 # Apply filters based on user input
-filtered_player_log = player_log[
+filtered_player_log_opp= player_log[
         (player_log['Opponent'] == selected_opponent) &
         (player_log['Starter'] == 'Y' if is_starter else True) &
         (player_log['Position'] == selected_position)
     ]
-filtered_player_log['Date'] = pd.to_datetime(filtered_player_log['Date']).dt.strftime('%m/%d/%Y')
-
-filtered_player_log[columns_to_format_4] = filtered_player_log[columns_to_format_4].applymap(lambda x: '{:.1f}'.format(x))
-st.dataframe(filtered_player_log.set_index(filtered_player_log.columns[0]))
+filtered_player_log_opp['Date'] = pd.to_datetime(filtered_player_log_opp['Date']).dt.strftime('%m/%d/%Y')
+filtered_player_log_opp[columns_to_format_4] = filtered_player_log_opp[columns_to_format_4].applymap(lambda x: '{:.1f}'.format(x))
+st.dataframe(filtered_player_log_opp.set_index(filtered_player_log_opp.columns[0]))
