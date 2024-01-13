@@ -1,15 +1,3 @@
-import pandas as pd
-import os
-import streamlit as st
-
-player_info_versues_defense_sheet_id = '1-LJBuRyoTfp38xLM_6TQ7fUOHgbEnNVh'
-todays_games_sheet_id = '1-Din9sCqXU7KGoRPenl8zX_KhBkFVLUg'
-player_log_id = '1-S9tHnbGZmU_bvif79po3Wa26zykbc0G'
-
-player_info_versues_defense = pd.read_csv(f"https://docs.google.com/spreadsheets/d/{player_info_versues_defense_sheet_id}/export?format=csv")
-todays_games = pd.read_csv(f"https://docs.google.com/spreadsheets/d/{todays_games_sheet_id}/export?format=csv")
-player_log  = pd.read_csv(f"https://docs.google.com/spreadsheets/d/{player_log_id}/export?format=csv")
-
 # Set page configuration
 st.set_page_config(layout="wide")
 
@@ -97,23 +85,29 @@ filtered_player_log_subset[columns_to_format_4] = filtered_player_log_subset[col
 st.dataframe(filtered_player_log_subset.set_index(filtered_player_log_subset.columns[0]))
 
 
-# Opposing Team  Player Log # 
+# Opposing Team Player Log #
+
 st.markdown(f'<h4 style="color:blue;">Players Against Opponent</h4>', unsafe_allow_html=True)
 selected_opponent = st.selectbox("Select Opponent:", sorted(player_log['Opponent'].unique()))
-
-# Create a dropdown menu for selecting a position
 selected_position = st.selectbox("Select Position:", sorted(player_log['Position'].unique()))
-
-# Create a checkbox for filtering by Starter
 is_starter = st.checkbox("Show only Starters")
 
-# Apply filters based on user input
-filtered_player_log_opp= player_log[
-        (player_log['Opponent'] == selected_opponent) &
-        (player_log['Starter'] == 'Y' if is_starter else True) &
-        (player_log['Position'] == selected_position)
-    ]
-filtered_player_log_opp['Date'] = pd.to_datetime(filtered_player_log_opp['Date']).dt.strftime('%m/%d/%Y')
-filtered_player_log_opp[columns_to_format_4] = filtered_player_log_opp[columns_to_format_4].applymap(lambda x: '{:.1f}'.format(x))
-st.dataframe(filtered_player_log_opp.set_index(filtered_player_log_opp.columns[0]))
+options_opp = ["Last 1", "Last 3", "Last 5", "Last 10", "All Dates"]
+selected_option_opp = st.selectbox("Select Last Games Played:", options_opp, key="opp_games_selectbox")
 
+# Filter the player log based on the selected opponent, starter, and position
+filtered_player_log_opp = player_log[
+    (player_log['Opponent'] == selected_opponent)
+    & (player_log['Starter'] == 'Y' if is_starter else True)
+    & (player_log['Position'] == selected_position)
+]
+filtered_player_log_opp['Date'] = pd.to_datetime(filtered_player_log_opp['Date']).dt.strftime('%Y-%m-%d')
+filtered_player_log_opp = filtered_player_log_opp.sort_values(by='Date', ascending=False)
+
+# Determine the number of columns to show based on the selected option
+if selected_option_opp == "All Dates":
+    num_columns_to_show_opp = len(filtered_player_log_opp)
+else:
+    num_columns_to_show_opp = int(selected_option_opp.split()[-1])
+filtered_player_log_opp[columns_to_format_4] = filtered_player_log_opp[columns_to_format_4].applymap(lambda x: '{:.1f}'.format(x))
+st.dataframe(filtered_player_log_opp.head(num_columns_to_show_opp).set_index(filtered_player_log_opp.columns[0]))
